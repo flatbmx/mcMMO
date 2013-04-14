@@ -186,7 +186,6 @@ public class PlayerProfile {
 
     public void skillUp(SkillType skillType, int newValue) {
         skills.put(skillType, skills.get(skillType) + newValue);
-        
     }
 
     /**
