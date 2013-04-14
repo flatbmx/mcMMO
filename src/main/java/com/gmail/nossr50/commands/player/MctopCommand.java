@@ -26,6 +26,10 @@ public class MctopCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (Config.getInstance().getScoreboardsEnabled()) {
+            
+        }
+
         switch (args.length) {
             case 0:
                 display(1, "ALL", sender, command);
