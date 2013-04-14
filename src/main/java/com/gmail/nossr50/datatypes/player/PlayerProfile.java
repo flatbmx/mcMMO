@@ -32,7 +32,7 @@ public class PlayerProfile {
     private HudType hudType;
     private MobHealthbarType mobHealthbarType;
     private McMMOHud spoutHud;
-    private Scoreboard statsScoreboard;
+    private Scoreboard playerStatsScoreboard;
 
     /* Skill Data */
     private final Map<SkillType, Integer>   skills     = new HashMap<SkillType, Integer>();   // Skill & Level
@@ -113,12 +113,12 @@ public class PlayerProfile {
      * Scoreboards
      */
 
-    public Scoreboard getStatsScoreboard() {
-        return statsScoreboard;
+    public Scoreboard getPlayerStatsScoreboard() {
+        return playerStatsScoreboard;
     }
 
-    public void setStatsScoreboard(Scoreboard statsScoreboard) {
-        this.statsScoreboard = statsScoreboard;
+    public void setPlayerStatsScoreboard(Scoreboard statsScoreboard) {
+        this.playerStatsScoreboard = statsScoreboard;
     }
 
     /*
