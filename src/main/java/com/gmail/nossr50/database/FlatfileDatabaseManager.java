@@ -326,6 +326,10 @@ public final class FlatfileDatabaseManager {
         return skills;
     }
 
+    public static List<PlayerStat> getPlayerStats(String skillName) {
+        return (skillName.equalsIgnoreCase("all")) ? powerLevels : playerStatHash.get(SkillType.getSkill(skillName));
+    }
+
     private static int loadStat(List<PlayerStat> statList, String playerName, String[] data, int dataIndex) {
         if (data.length > dataIndex) {
             int statValue = Integer.parseInt(data[dataIndex]);
