@@ -13,6 +13,7 @@ import org.bukkit.util.StringUtil;
 import com.gmail.nossr50.mcMMO;
 import com.gmail.nossr50.config.Config;
 import com.gmail.nossr50.database.FlatfileDatabaseManager;
+import com.gmail.nossr50.datatypes.database.PlayerStat;
 import com.gmail.nossr50.datatypes.skills.SkillType;
 import com.gmail.nossr50.locale.LocaleLoader;
 import com.gmail.nossr50.runnables.commands.MctopCommandAsyncTask;
@@ -28,7 +29,7 @@ public class MctopCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof Player && Config.getInstance().getScoreboardsEnabled()) {
+        if (sender instanceof Player && Config.getInstance().getMctopScoreboardEnabled()) {
             ScoreboardManager.setupGlobalStatsScoreboard();
         }
 
@@ -83,15 +84,21 @@ public class MctopCommand implements TabExecutor {
             return;
         }
 
-        if (sender instanceof Player && Config.getInstance().getScoreboardsEnabled()) {
-            ScoreboardManager.enableGlobalStatsScoreboard((Player) sender, skill);
-        }
-
-        if (Config.getInstance().getUseMySQL()) {
-            sqlDisplay(page, skill, sender);
+        if (sender instanceof Player && Config.getInstance().getMctopScoreboardEnabled()) {
+            if (Config.getInstance().getUseMySQL()) {
+                
+            }
+            else {
+                ScoreboardManager.enableGlobalStatsScoreboard((Player) sender, skill, page);
+            }
         }
         else {
-            flatfileDisplay(page, skill, sender);
+            if (Config.getInstance().getUseMySQL()) {
+                sqlDisplay(page, skill, sender);
+            }
+            else {
+                flatfileDisplay(page, skill, sender);
+            }
         }
     }
 
@@ -107,21 +114,11 @@ public class MctopCommand implements TabExecutor {
 
         int position = (page * 10) - 9;
 
-        for (String playerStat : FlatfileDatabaseManager.retrieveInfo(skill, page)) {
-            if (playerStat == null) {
-                continue;
-            }
-
-            String digit = String.valueOf(position);
-
-            if (position < 10) {
-                digit = "0" + digit;
-            }
-
-            String[] splitStat = playerStat.split(":");
+        for (PlayerStat stat : FlatfileDatabaseManager.retrieveInfo(skill, page, 10)) {
+            String digit = (position < 10) ? "0" : "" + String.valueOf(position);
 
             // Format: 1. Playername - skill value
-            sender.sendMessage(digit + ". " + ChatColor.GREEN + splitStat[1] + " - " + ChatColor.WHITE + splitStat[0]);
+            sender.sendMessage(digit + ". " + ChatColor.GREEN + stat.name + " - " + ChatColor.WHITE + stat.statVal);
             position++;
         }
 
