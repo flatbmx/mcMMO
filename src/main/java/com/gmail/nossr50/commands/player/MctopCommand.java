@@ -85,12 +85,7 @@ public class MctopCommand implements TabExecutor {
         }
 
         if (sender instanceof Player && Config.getInstance().getMctopScoreboardEnabled()) {
-            if (Config.getInstance().getUseMySQL()) {
-                
-            }
-            else {
-                ScoreboardManager.enableGlobalStatsScoreboard((Player) sender, skill, page);
-            }
+            ScoreboardManager.enableGlobalStatsScoreboard((Player) sender, skill, page);
         }
         else {
             if (Config.getInstance().getUseMySQL()) {
