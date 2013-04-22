@@ -10,12 +10,14 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.util.StringUtil;
 
 import com.gmail.nossr50.mcMMO;
+import com.gmail.nossr50.config.Config;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.player.PlayerProfile;
 import com.gmail.nossr50.runnables.commands.McrankCommandAsyncTask;
 import com.gmail.nossr50.util.Permissions;
 import com.gmail.nossr50.util.commands.CommandUtils;
 import com.gmail.nossr50.util.player.UserManager;
+import com.gmail.nossr50.util.scoreboards.ScoreboardManager;
 import com.google.common.collect.ImmutableList;
 
 public class McrankCommand implements TabExecutor {
@@ -30,6 +32,10 @@ public class McrankCommand implements TabExecutor {
                 if (!Permissions.mcrank(sender)) {
                     sender.sendMessage(command.getPermissionMessage());
                     return true;
+                }
+
+                if (Config.getInstance().getMcrankScoreboardEnabled()) {
+                    ScoreboardManager.setupPlayerRankScoreboard(sender.getName());
                 }
 
                 display(sender, sender.getName());

@@ -21,6 +21,7 @@ import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.player.PlayerProfile;
 import com.gmail.nossr50.datatypes.skills.SkillType;
 import com.gmail.nossr50.runnables.scoreboards.ScoreboardChangeTask;
+import com.gmail.nossr50.util.Permissions;
 import com.gmail.nossr50.util.skills.SkillUtils;
 
 public class ScoreboardManager {
@@ -39,27 +40,40 @@ public class ScoreboardManager {
 //    public static final OfflinePlayer WOODCUTTING_PLAYER = mcMMO.p.getServer().getOfflinePlayer(SkillUtils.getSkillName(SkillType.WOODCUTTING));
 
     public static final Map<String, Scoreboard> PLAYER_STATS_SCOREBOARDS = new HashMap<String, Scoreboard>();
+    public static final Map<String, Scoreboard> PLAYER_RANK_SCOREBOARDS = new HashMap<String, Scoreboard>();
 
     public static Scoreboard globalStatsScoreboard;
 
     private static Objective playerStats;
+    private static Objective playerRank;
 
     public final static String PLAYER_STATS_HEADER   = "mcMMO Stats";
     public final static String PLAYER_STATS_CRITERIA = "Player Skill Levels";
 
+    public final static String PLAYER_RANK_HEADER   = "mcMMO Rankings";
+    public final static String PLAYER_RANK_CRITERIA = "Player Skill Ranks";
+
     public final static String GLOBAL_STATS_POWER_LEVEL = "Power Level";
 
     public static void setupPlayerStatsScoreboard(String playerName) {
-        if (PLAYER_STATS_SCOREBOARDS.containsKey(playerName)) {
+        setupPlayerScoreboard(playerName, PLAYER_STATS_SCOREBOARDS, playerStats, PLAYER_STATS_HEADER, PLAYER_STATS_CRITERIA);
+    }
+
+    public static void setupPlayerRankScoreboard(String playerName) {
+        setupPlayerScoreboard(playerName, PLAYER_RANK_SCOREBOARDS, playerRank, PLAYER_RANK_HEADER, PLAYER_RANK_CRITERIA);
+    }
+
+    private static void setupPlayerScoreboard(String playerName, Map<String, Scoreboard> scoreboardMap, Objective objective, String header, String criteria) {
+        if (scoreboardMap.containsKey(playerName)) {
             return;
         }
 
         Scoreboard scoreboard = mcMMO.p.getServer().getScoreboardManager().getNewScoreboard();
 
-        playerStats = scoreboard.registerNewObjective(PLAYER_STATS_HEADER, PLAYER_STATS_CRITERIA);
-        playerStats.setDisplaySlot(DisplaySlot.SIDEBAR);
+        objective = scoreboard.registerNewObjective(header, criteria);
+        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        PLAYER_STATS_SCOREBOARDS.put(playerName, scoreboard);
+        scoreboardMap.put(playerName, scoreboard);
     }
 
     public static void setupGlobalStatsScoreboard() {
@@ -83,6 +97,24 @@ public class ScoreboardManager {
         player.setScoreboard(newScoreboard);
 
         int displayTime = Config.getInstance().getMcstatsScoreboardTime();
+
+        if (displayTime != -1) {
+            new ScoreboardChangeTask(player, oldScoreboard).runTaskLater(mcMMO.p, displayTime * 20);
+        }
+    }
+
+    public static void enablePlayerRankScoreboard(Player player) {
+        Scoreboard oldScoreboard = player.getScoreboard();
+        Scoreboard newScoreboard = PLAYER_RANK_SCOREBOARDS.get(player.getName());
+
+        if (oldScoreboard == newScoreboard) {
+            return;
+        }
+
+        updatePlayerRankScores(player);
+        player.setScoreboard(newScoreboard);
+
+        int displayTime = Config.getInstance().getMcrankScoreboardTime();
 
         if (displayTime != -1) {
             new ScoreboardChangeTask(player, oldScoreboard).runTaskLater(mcMMO.p, displayTime * 20);
@@ -123,11 +155,12 @@ public class ScoreboardManager {
     }
 
     private static void updatePlayerStatsScores(McMMOPlayer mcMMOPlayer) {
+        Player player = mcMMOPlayer.getPlayer();
         PlayerProfile profile = mcMMOPlayer.getProfile();
         Server server = mcMMO.p.getServer();
 
         for (SkillType skill : SkillType.values()) {
-            if (skill.isChildSkill()) {
+            if (skill.isChildSkill() || !Permissions.skillEnabled(player, skill)) {
                 continue;
             }
 
@@ -135,6 +168,32 @@ public class ScoreboardManager {
         }
 
         playerStats.getScore(server.getOfflinePlayer(ChatColor.GOLD + "Power Level")).setScore(mcMMOPlayer.getPowerLevel());
+    }
+
+    private static void updatePlayerRankScores(Player player) {
+        String playerName = player.getName();
+        Server server = mcMMO.p.getServer();
+        Integer rank;
+
+        Map<String, Integer> skills = Config.getInstance().getUseMySQL() ? SQLDatabaseManager.readSQLRank(playerName) : FlatfileDatabaseManager.getPlayerRanks(playerName);
+
+        for (SkillType skill : SkillType.values()) {
+            if (skill.isChildSkill() || !Permissions.skillEnabled(player, skill)) {
+                continue;
+            }
+
+            rank = skills.get(skill.name());
+
+            if (rank != null) {
+                playerStats.getScore(server.getOfflinePlayer(SkillUtils.getSkillName(skill))).setScore(rank);
+            }
+        }
+
+        rank = skills.get("ALL");
+
+        if (rank != null) {
+            playerStats.getScore(server.getOfflinePlayer(ChatColor.GOLD + "Overall")).setScore(rank);
+        }
     }
 
     private static void updateGlobalStatsScores(Player player, Objective objective, String skillName, int pageNumber) {
