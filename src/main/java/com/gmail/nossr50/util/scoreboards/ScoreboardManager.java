@@ -147,13 +147,6 @@ public class ScoreboardManager {
         }
     }
 
-    public static void updatePlayerStatsScore(McMMOPlayer mcMMOPlayer, SkillType skill) {
-        Server server = mcMMO.p.getServer();
-
-        playerStats.getScore(server.getOfflinePlayer(SkillUtils.getSkillName(skill))).setScore(mcMMOPlayer.getProfile().getSkillLevel(skill));
-        playerStats.getScore(server.getOfflinePlayer(ChatColor.GOLD + "Power Level")).setScore(mcMMOPlayer.getPowerLevel());
-    }
-
     private static void updatePlayerStatsScores(McMMOPlayer mcMMOPlayer) {
         Player player = mcMMOPlayer.getPlayer();
         PlayerProfile profile = mcMMOPlayer.getProfile();

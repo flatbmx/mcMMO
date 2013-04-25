@@ -272,10 +272,6 @@ public class SkillUtils {
                 }
             }
         }
-
-        if (Config.getInstance().getMcstatsScoreboardsEnabled()) {
-            ScoreboardManager.updatePlayerStatsScore(UserManager.getPlayer(player), skillType);
-        }
     }
 
     /**
