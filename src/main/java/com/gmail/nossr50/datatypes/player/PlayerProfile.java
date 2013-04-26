@@ -73,6 +73,10 @@ public class PlayerProfile {
         }
     }
 
+    public String getPlayerName() {
+        return playerName;
+    }
+
     public boolean isLoaded() {
         return loaded;
     }

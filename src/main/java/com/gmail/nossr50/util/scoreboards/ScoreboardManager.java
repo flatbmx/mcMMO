@@ -39,15 +39,11 @@ public class ScoreboardManager {
 //    public static final OfflinePlayer UNARMED_PLAYER = mcMMO.p.getServer().getOfflinePlayer(SkillUtils.getSkillName(SkillType.UNARMED));
 //    public static final OfflinePlayer WOODCUTTING_PLAYER = mcMMO.p.getServer().getOfflinePlayer(SkillUtils.getSkillName(SkillType.WOODCUTTING));
 
-    public static final Map<String, Scoreboard> PLAYER_STATS_SCOREBOARDS = new HashMap<String, Scoreboard>();
-    public static final Map<String, Scoreboard> PLAYER_RANK_SCOREBOARDS = new HashMap<String, Scoreboard>();
     public static final Map<String, Scoreboard> PLAYER_INSPECT_SCOREBOARDS = new HashMap<String, Scoreboard>();
+    public static final Map<String, Scoreboard> PLAYER_STATS_SCOREBOARDS   = new HashMap<String, Scoreboard>();
+    public static final Map<String, Scoreboard> PLAYER_RANK_SCOREBOARDS    = new HashMap<String, Scoreboard>();
 
     public static Scoreboard globalStatsScoreboard;
-
-    private static Objective playerStats;
-    private static Objective playerRank;
-    private static Objective playerInspect;
 
     public final static String PLAYER_STATS_HEADER   = "mcMMO Stats";
     public final static String PLAYER_STATS_CRITERIA = "Player Skill Levels";
@@ -61,25 +57,25 @@ public class ScoreboardManager {
     public final static String GLOBAL_STATS_POWER_LEVEL = "Power Level";
 
     public static void setupPlayerStatsScoreboard(String playerName) {
-        setupPlayerScoreboard(playerName, PLAYER_STATS_SCOREBOARDS, playerStats, PLAYER_STATS_HEADER, PLAYER_STATS_CRITERIA);
+        setupPlayerScoreboard(playerName, PLAYER_STATS_SCOREBOARDS, PLAYER_STATS_HEADER, PLAYER_STATS_CRITERIA);
     }
 
     public static void setupPlayerRankScoreboard(String playerName) {
-        setupPlayerScoreboard(playerName, PLAYER_RANK_SCOREBOARDS, playerRank, PLAYER_RANK_HEADER, PLAYER_RANK_CRITERIA);
+        setupPlayerScoreboard(playerName, PLAYER_RANK_SCOREBOARDS, PLAYER_RANK_HEADER, PLAYER_RANK_CRITERIA);
     }
 
     public static void setupPlayerInspectScoreboard(String playerName) {
-        setupPlayerScoreboard(playerName, PLAYER_INSPECT_SCOREBOARDS, playerInspect, PLAYER_INSPECT_HEADER, PLAYER_INSPECT_CRITERIA);
+        setupPlayerScoreboard(playerName, PLAYER_INSPECT_SCOREBOARDS, PLAYER_INSPECT_HEADER, PLAYER_INSPECT_CRITERIA);
     }
 
-    private static void setupPlayerScoreboard(String playerName, Map<String, Scoreboard> scoreboardMap, Objective objective, String header, String criteria) {
+    private static void setupPlayerScoreboard(String playerName, Map<String, Scoreboard> scoreboardMap, String header, String criteria) {
         if (scoreboardMap.containsKey(playerName)) {
             return;
         }
 
         Scoreboard scoreboard = mcMMO.p.getServer().getScoreboardManager().getNewScoreboard();
 
-        objective = scoreboard.registerNewObjective(header, criteria);
+        Objective objective = scoreboard.registerNewObjective(header, criteria);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
         scoreboardMap.put(playerName, scoreboard);
@@ -102,7 +98,7 @@ public class ScoreboardManager {
             return;
         }
 
-        updatePlayerStatsScores(mcMMOPlayer);
+        updatePlayerStatsScores(mcMMOPlayer, newScoreboard);
         player.setScoreboard(newScoreboard);
 
         int displayTime = Config.getInstance().getMcstatsScoreboardTime();
@@ -120,10 +116,64 @@ public class ScoreboardManager {
             return;
         }
 
-        updatePlayerRankScores(player);
+        updatePlayerRankScores(player, newScoreboard);
         player.setScoreboard(newScoreboard);
 
         int displayTime = Config.getInstance().getMcrankScoreboardTime();
+
+        if (displayTime != -1) {
+            new ScoreboardChangeTask(player, oldScoreboard).runTaskLater(mcMMO.p, displayTime * 20);
+        }
+    }
+
+    public static void enablePlayerRankScoreboardOthers(Player player, String targetName) {
+        Scoreboard oldScoreboard = player.getScoreboard();
+        Scoreboard newScoreboard = PLAYER_RANK_SCOREBOARDS.get(player.getName());
+
+        if (oldScoreboard == newScoreboard) {
+            return;
+        }
+
+        updatePlayerRankOthersScores(targetName, newScoreboard);
+        player.setScoreboard(newScoreboard);
+
+        int displayTime = Config.getInstance().getMcrankScoreboardTime();
+
+        if (displayTime != -1) {
+            new ScoreboardChangeTask(player, oldScoreboard).runTaskLater(mcMMO.p, displayTime * 20);
+        }
+    }
+
+    public static void enablePlayerInspectScoreboardOnline(Player player, McMMOPlayer mcMMOTarget) {
+        Scoreboard oldScoreboard = player.getScoreboard();
+        Scoreboard newScoreboard = PLAYER_INSPECT_SCOREBOARDS.get(player.getName());
+
+        if (oldScoreboard == newScoreboard) {
+            return;
+        }
+
+        updatePlayerInspectOnlineScores(mcMMOTarget, newScoreboard);
+        player.setScoreboard(newScoreboard);
+
+        int displayTime = Config.getInstance().getInspectScoreboardTime();
+
+        if (displayTime != -1) {
+            new ScoreboardChangeTask(player, oldScoreboard).runTaskLater(mcMMO.p, displayTime * 20);
+        }
+    }
+
+    public static void enablePlayerInspectScoreboardOffline(Player player, PlayerProfile targetProfile) {
+        Scoreboard oldScoreboard = player.getScoreboard();
+        Scoreboard newScoreboard = PLAYER_INSPECT_SCOREBOARDS.get(player.getName());
+
+        if (oldScoreboard == newScoreboard) {
+            return;
+        }
+
+        updatePlayerInspectOfflineScores(targetProfile, newScoreboard);
+        player.setScoreboard(newScoreboard);
+
+        int displayTime = Config.getInstance().getInspectScoreboardTime();
 
         if (displayTime != -1) {
             new ScoreboardChangeTask(player, oldScoreboard).runTaskLater(mcMMO.p, displayTime * 20);
@@ -156,7 +206,8 @@ public class ScoreboardManager {
         }
     }
 
-    private static void updatePlayerStatsScores(McMMOPlayer mcMMOPlayer) {
+    private static void updatePlayerStatsScores(McMMOPlayer mcMMOPlayer, Scoreboard scoreboard) {
+        Objective objective = scoreboard.getObjective(PLAYER_STATS_HEADER);
         Player player = mcMMOPlayer.getPlayer();
         PlayerProfile profile = mcMMOPlayer.getProfile();
         Server server = mcMMO.p.getServer();
@@ -166,13 +217,14 @@ public class ScoreboardManager {
                 continue;
             }
 
-            playerStats.getScore(server.getOfflinePlayer(SkillUtils.getSkillName(skill))).setScore(profile.getSkillLevel(skill));
+            objective.getScore(server.getOfflinePlayer(SkillUtils.getSkillName(skill))).setScore(profile.getSkillLevel(skill));
         }
 
-        playerStats.getScore(server.getOfflinePlayer(ChatColor.GOLD + "Power Level")).setScore(mcMMOPlayer.getPowerLevel());
+        objective.getScore(server.getOfflinePlayer(ChatColor.GOLD + "Power Level")).setScore(mcMMOPlayer.getPowerLevel());
     }
 
-    private static void updatePlayerRankScores(Player player) {
+    private static void updatePlayerRankScores(Player player, Scoreboard scoreboard) {
+        Objective objective = scoreboard.getObjective(PLAYER_RANK_HEADER);
         String playerName = player.getName();
         Server server = mcMMO.p.getServer();
         Integer rank;
@@ -187,15 +239,83 @@ public class ScoreboardManager {
             rank = skills.get(skill.name());
 
             if (rank != null) {
-                playerStats.getScore(server.getOfflinePlayer(SkillUtils.getSkillName(skill))).setScore(rank);
+                objective.getScore(server.getOfflinePlayer(SkillUtils.getSkillName(skill))).setScore(rank);
             }
         }
 
         rank = skills.get("ALL");
 
         if (rank != null) {
-            playerStats.getScore(server.getOfflinePlayer(ChatColor.GOLD + "Overall")).setScore(rank);
+            objective.getScore(server.getOfflinePlayer(ChatColor.GOLD + "Overall")).setScore(rank);
         }
+    }
+
+    private static void updatePlayerRankOthersScores(String targetName, Scoreboard scoreboard) {
+        Objective objective = scoreboard.getObjective(PLAYER_RANK_HEADER);
+        Server server = mcMMO.p.getServer();
+        Integer rank;
+
+        Map<String, Integer> skills = Config.getInstance().getUseMySQL() ? SQLDatabaseManager.readSQLRank(targetName) : FlatfileDatabaseManager.getPlayerRanks(targetName);
+
+        for (SkillType skill : SkillType.values()) {
+            if (skill.isChildSkill()) {
+                continue;
+            }
+
+            rank = skills.get(skill.name());
+
+            if (rank != null) {
+                objective.getScore(server.getOfflinePlayer(SkillUtils.getSkillName(skill))).setScore(rank);
+            }
+        }
+
+        rank = skills.get("ALL");
+
+        if (rank != null) {
+            objective.getScore(server.getOfflinePlayer(ChatColor.GOLD + "Overall")).setScore(rank);
+        }
+    }
+
+    private static void updatePlayerInspectOnlineScores(McMMOPlayer mcMMOTarget, Scoreboard scoreboard) {
+        Objective objective = scoreboard.getObjective(PLAYER_INSPECT_HEADER);
+        Player target = mcMMOTarget.getPlayer();
+        PlayerProfile profile = mcMMOTarget.getProfile();
+        Server server = mcMMO.p.getServer();
+        int powerLevel = 0;
+        int skillLevel;
+
+        for (SkillType skill : SkillType.values()) {
+            if (skill.isChildSkill() || !Permissions.skillEnabled(target, skill)) {
+                continue;
+            }
+
+            skillLevel = profile.getSkillLevel(skill);
+            objective.getScore(server.getOfflinePlayer(SkillUtils.getSkillName(skill))).setScore(skillLevel);
+            powerLevel += skillLevel;
+        }
+
+        objective.getScore(server.getOfflinePlayer(ChatColor.GOLD + "Power Level")).setScore(powerLevel);
+        objective.setDisplayName(PLAYER_INSPECT_HEADER + target.getName());
+    }
+
+    private static void updatePlayerInspectOfflineScores(PlayerProfile targetProfile, Scoreboard scoreboard) {
+        Objective objective = scoreboard.getObjective(PLAYER_INSPECT_HEADER);
+        Server server = mcMMO.p.getServer();
+        int powerLevel = 0;
+        int skillLevel;
+
+        for (SkillType skill : SkillType.values()) {
+            if (skill.isChildSkill()) {
+                continue;
+            }
+
+            skillLevel = targetProfile.getSkillLevel(skill);
+            objective.getScore(server.getOfflinePlayer(SkillUtils.getSkillName(skill))).setScore(skillLevel);
+            powerLevel += skillLevel;
+        }
+
+        objective.getScore(server.getOfflinePlayer(ChatColor.GOLD + "Power Level")).setScore(powerLevel);
+        objective.setDisplayName(PLAYER_INSPECT_HEADER + targetProfile.getPlayerName());
     }
 
     private static void updateGlobalStatsScores(Player player, Objective objective, String skillName, int pageNumber) {

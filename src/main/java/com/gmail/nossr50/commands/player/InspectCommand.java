@@ -41,6 +41,11 @@ public class InspectCommand implements TabExecutor {
                         return true;
                     }
 
+                    if (sender instanceof Player && Config.getInstance().getInspectScoreboardEnabled()) {
+                        ScoreboardManager.enablePlayerInspectScoreboardOffline((Player) sender, profile);
+                        return true;
+                    }
+
                     sender.sendMessage(LocaleLoader.getString("Inspect.OfflineStats", args[0]));
 
                     sender.sendMessage(LocaleLoader.getString("Stats.Header.Gathering"));
@@ -65,6 +70,11 @@ public class InspectCommand implements TabExecutor {
                     Player target = mcMMOPlayer.getPlayer();
 
                     if (CommandUtils.tooFar(sender, target, Permissions.inspectFar(sender))) {
+                        return true;
+                    }
+
+                    if (sender instanceof Player && Config.getInstance().getInspectScoreboardEnabled()) {
+                        ScoreboardManager.enablePlayerInspectScoreboardOnline((Player) sender, mcMMOPlayer);
                         return true;
                     }
 
