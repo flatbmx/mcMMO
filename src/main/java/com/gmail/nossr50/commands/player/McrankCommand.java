@@ -7,6 +7,7 @@ import java.util.Set;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
+import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
 import com.gmail.nossr50.mcMMO;
@@ -36,6 +37,7 @@ public class McrankCommand implements TabExecutor {
 
                 if (Config.getInstance().getMcrankScoreboardEnabled()) {
                     ScoreboardManager.setupPlayerRankScoreboard(sender.getName());
+                    ScoreboardManager.enablePlayerRankScoreboard((Player) sender);
                 }
 
                 display(sender, sender.getName());

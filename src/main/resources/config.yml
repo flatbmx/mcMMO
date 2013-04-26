@@ -28,6 +28,11 @@ General:
     Config_Update_Overwrite: true
 
 Scoreboards:
+    Inspect:
+        # Should mcMMO use scoreboards for /inspect?
+        Use: true
+        # Amount of time (in seconds) to display. To display permanently, set to -1
+        Display_Time: 10
     Mcrank:
         # Should mcMMO use scoreboards for /mcrank?
         Use: true

@@ -41,17 +41,22 @@ public class ScoreboardManager {
 
     public static final Map<String, Scoreboard> PLAYER_STATS_SCOREBOARDS = new HashMap<String, Scoreboard>();
     public static final Map<String, Scoreboard> PLAYER_RANK_SCOREBOARDS = new HashMap<String, Scoreboard>();
+    public static final Map<String, Scoreboard> PLAYER_INSPECT_SCOREBOARDS = new HashMap<String, Scoreboard>();
 
     public static Scoreboard globalStatsScoreboard;
 
     private static Objective playerStats;
     private static Objective playerRank;
+    private static Objective playerInspect;
 
     public final static String PLAYER_STATS_HEADER   = "mcMMO Stats";
     public final static String PLAYER_STATS_CRITERIA = "Player Skill Levels";
 
     public final static String PLAYER_RANK_HEADER   = "mcMMO Rankings";
     public final static String PLAYER_RANK_CRITERIA = "Player Skill Ranks";
+
+    public final static String PLAYER_INSPECT_HEADER   = "mcMMO Stats - ";
+    public final static String PLAYER_INSPECT_CRITERIA = "Other Player Skill Levels";
 
     public final static String GLOBAL_STATS_POWER_LEVEL = "Power Level";
 
@@ -61,6 +66,10 @@ public class ScoreboardManager {
 
     public static void setupPlayerRankScoreboard(String playerName) {
         setupPlayerScoreboard(playerName, PLAYER_RANK_SCOREBOARDS, playerRank, PLAYER_RANK_HEADER, PLAYER_RANK_CRITERIA);
+    }
+
+    public static void setupPlayerInspectScoreboard(String playerName) {
+        setupPlayerScoreboard(playerName, PLAYER_INSPECT_SCOREBOARDS, playerInspect, PLAYER_INSPECT_HEADER, PLAYER_INSPECT_CRITERIA);
     }
 
     private static void setupPlayerScoreboard(String playerName, Map<String, Scoreboard> scoreboardMap, Objective objective, String header, String criteria) {
