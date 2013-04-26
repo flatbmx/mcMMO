@@ -28,7 +28,7 @@ public class InspectCommand implements TabExecutor {
         switch (args.length) {
             case 1:
                 if (sender instanceof Player && Config.getInstance().getInspectScoreboardEnabled()) {
-                    ScoreboardManager.setupPlayerInspectScoreboard(sender.getName());
+                    ScoreboardManager.setupPlayerScoreboard(sender.getName());
                 }
 
                 McMMOPlayer mcMMOPlayer = UserManager.getPlayer(args[0]);
