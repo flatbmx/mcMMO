@@ -51,7 +51,7 @@ public class ScoreboardManager {
     public final static String PLAYER_RANK_HEADER   = "mcMMO Rankings";
     public final static String PLAYER_RANK_CRITERIA = "Player Skill Ranks";
 
-    public final static String PLAYER_INSPECT_HEADER   = "mcMMO Stats - ";
+    public final static String PLAYER_INSPECT_HEADER   = "mcMMO Stats: ";
     public final static String PLAYER_INSPECT_CRITERIA = "Other Player Skill Levels";
 
     public final static String GLOBAL_STATS_POWER_LEVEL = "Power Level";
@@ -274,6 +274,8 @@ public class ScoreboardManager {
         if (rank != null) {
             objective.getScore(server.getOfflinePlayer(ChatColor.GOLD + "Overall")).setScore(rank);
         }
+
+        objective.setDisplayName(PLAYER_RANK_HEADER + ": " + targetName);
     }
 
     private static void updatePlayerInspectOnlineScores(McMMOPlayer mcMMOTarget, Scoreboard scoreboard) {
