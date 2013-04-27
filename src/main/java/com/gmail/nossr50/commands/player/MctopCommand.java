@@ -29,9 +29,9 @@ public class MctopCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof Player && Config.getInstance().getMctopScoreboardEnabled()) {
-            ScoreboardManager.setupGlobalStatsScoreboard();
-        }
+//        if (sender instanceof Player && Config.getInstance().getMctopScoreboardEnabled()) {
+//            ScoreboardManager.setupGlobalStatsScoreboard();
+//        }
 
         switch (args.length) {
             case 0:

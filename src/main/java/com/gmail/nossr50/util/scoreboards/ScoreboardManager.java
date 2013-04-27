@@ -41,8 +41,7 @@ public class ScoreboardManager {
 //    public static final OfflinePlayer WOODCUTTING_PLAYER = mcMMO.p.getServer().getOfflinePlayer(SkillUtils.getSkillName(SkillType.WOODCUTTING));
 
     private static final Map<String, Scoreboard> PLAYER_SCOREBOARDS = new HashMap<String, Scoreboard>();
-
-    private static Scoreboard globalStatsScoreboard;
+    private static final Scoreboard globalStatsScoreboard = mcMMO.p.getServer().getScoreboardManager().getNewScoreboard();
 
     public final static String PLAYER_STATS_HEADER   = "mcMMO Stats";
     public final static String PLAYER_STATS_CRITERIA = "Player Skill Levels";
@@ -61,14 +60,6 @@ public class ScoreboardManager {
         }
 
         PLAYER_SCOREBOARDS.put(playerName, mcMMO.p.getServer().getScoreboardManager().getNewScoreboard());
-    }
-
-    public static void setupGlobalStatsScoreboard() {
-        if (globalStatsScoreboard != null) {
-            return;
-        }
-
-        globalStatsScoreboard = mcMMO.p.getServer().getScoreboardManager().getNewScoreboard();
     }
 
     public static void enablePlayerStatsScoreboard(McMMOPlayer mcMMOPlayer) {
@@ -149,18 +140,7 @@ public class ScoreboardManager {
         newObjective.setDisplayName(ChatColor.GOLD + (skillName.equalsIgnoreCase("all") ? GLOBAL_STATS_POWER_LEVEL : SkillUtils.getSkillName(SkillType.getSkill(skillName))));
 
         updateGlobalStatsScores(player, newObjective, skillName, pageNumber);
-
-        if (oldScoreboard == globalStatsScoreboard) {
-            return;
-        }
-
-        player.setScoreboard(globalStatsScoreboard);
-
-        int displayTime = Config.getInstance().getMctopScoreboardTime();
-
-        if (displayTime != -1) {
-            new ScoreboardChangeTask(player, oldScoreboard).runTaskLater(mcMMO.p, displayTime * 20);
-        }
+        changeScoreboard(player, oldScoreboard, globalStatsScoreboard, Config.getInstance().getMctopScoreboardTime());
     }
 
     private static void updatePlayerStatsScores(McMMOPlayer mcMMOPlayer, Objective objective) {
