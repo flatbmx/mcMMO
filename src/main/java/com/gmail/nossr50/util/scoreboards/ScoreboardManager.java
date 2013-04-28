@@ -3,6 +3,7 @@ package com.gmail.nossr50.util.scoreboards;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.ChatColor;
@@ -53,6 +54,8 @@ public class ScoreboardManager {
     public final static String PLAYER_INSPECT_CRITERIA = "Other Player Skill Levels";
 
     public final static String GLOBAL_STATS_POWER_LEVEL = "Power Level";
+
+    private final static List<String> SCOREBOARD_TASKS = new ArrayList<String>();
 
     public static void setupPlayerScoreboard(String playerName) {
         if (PLAYER_SCOREBOARDS.containsKey(playerName)) {
@@ -290,11 +293,18 @@ public class ScoreboardManager {
 
     private static void changeScoreboard(Player player, Scoreboard oldScoreboard, Scoreboard newScoreboard, int displayTime) {
         if (oldScoreboard != newScoreboard) {
+            String playerName = player.getName();
+
             player.setScoreboard(newScoreboard);
 
-            if (displayTime != -1) {
+            if (displayTime != -1 && !SCOREBOARD_TASKS.contains(playerName)) {
                 new ScoreboardChangeTask(player, oldScoreboard).runTaskLater(mcMMO.p, displayTime * 20);
+                SCOREBOARD_TASKS.add(playerName);
             }
         }
+    }
+
+    public static void clearPendingTask(String playerName) {
+        SCOREBOARD_TASKS.remove(playerName);
     }
 }

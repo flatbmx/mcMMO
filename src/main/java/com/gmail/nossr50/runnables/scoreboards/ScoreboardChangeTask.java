@@ -4,6 +4,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 
+import com.gmail.nossr50.util.scoreboards.ScoreboardManager;
+
 public class ScoreboardChangeTask extends BukkitRunnable {
     private Player player;
     private Scoreboard oldScoreboard;
@@ -16,5 +18,6 @@ public class ScoreboardChangeTask extends BukkitRunnable {
     @Override
     public void run() {
         player.setScoreboard(oldScoreboard);
+        ScoreboardManager.clearPendingTask(player.getName());
     }
 }

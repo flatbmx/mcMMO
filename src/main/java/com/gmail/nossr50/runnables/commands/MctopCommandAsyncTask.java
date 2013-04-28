@@ -11,7 +11,6 @@ import com.gmail.nossr50.config.Config;
 import com.gmail.nossr50.database.SQLDatabaseManager;
 
 public class MctopCommandAsyncTask extends BukkitRunnable {
-
     private CommandSender sender;
     private String query;
     private int page;
