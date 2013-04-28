@@ -47,7 +47,7 @@ public class ScoreboardManager {
         Player player = mcMMOPlayer.getPlayer();
         Scoreboard oldScoreboard = player.getScoreboard();
         Scoreboard newScoreboard = PLAYER_SCOREBOARDS.get(player.getName());
-        Objective objective = newScoreboard.getObjective(PLAYER_STATS_HEADER);
+        Objective objective = newScoreboard.getObjective(SkillUtils.getSkillName(skill));
 
         if (objective == null) {
             objective = newScoreboard.registerNewObjective(SkillUtils.getSkillName(skill), "dummy");
