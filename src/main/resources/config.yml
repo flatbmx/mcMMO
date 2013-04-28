@@ -48,6 +48,12 @@ Scoreboards:
         Use: true
         # Amount of time (in seconds) to display. To display permanently, set to -1
         Display_Time: 10
+    Skillname:
+        # Should mcMMO use scoreboards for /skillname (/mining, /fishing, etc.)?
+        Use: true
+        # Amount of time (in seconds) to display. To display permanently, set to -1
+        Display_Time: 10
+
 
 Mob_Healthbar:
     # Default display for mob health bars - HEARTS, BAR, or DISABLED
